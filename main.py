@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi_pagination import Page, add_pagination, paginate
 
 from models.AppStatus import AppStatus
 from models.User import User
@@ -26,10 +27,11 @@ def get_user(user_id: int) -> User:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User not found")
     return users[user_id - 1]
 
+@app.get("/api/users/", status_code=HTTPStatus.OK, response_model=Page[dict])
+def get_users() -> Page[User]:
+    return paginate(users)
 
-@app.get("/api/users/", status_code=HTTPStatus.OK)
-def get_users() -> list[User]:
-    return users
+add_pagination(app)
 
 
 if __name__ == "__main__":
@@ -41,4 +43,4 @@ if __name__ == "__main__":
 
     print("Users loaded")
 
-    uvicorn.run(app, host="localhost", port=8002)
+    uvicorn.run(app, host="localhost", port=8080)
